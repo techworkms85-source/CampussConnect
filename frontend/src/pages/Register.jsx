@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import Logo from '../components/Logo';
 
 export default function Register() {
   const { register } = useAuth();
@@ -40,8 +41,8 @@ export default function Register() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">CP</span>
+          <div className="flex justify-center mb-4">
+            <Logo size={64} />
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Create Account</h1>
           <p className="text-gray-500 dark:text-gray-400 mt-1">Join the campus community</p>

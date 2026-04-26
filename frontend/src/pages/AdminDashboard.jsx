@@ -2,34 +2,33 @@ import React, { useState, useEffect } from 'react';
 import api from '../utils/api';
 import toast from 'react-hot-toast';
 import Spinner from '../components/Spinner';
-import { UsersIcon, CalendarIcon, UserGroupIcon, ChatBubbleLeftIcon, BookOpenIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import Modal from '../components/Modal';
+import { UsersIcon, CalendarIcon, UserGroupIcon, ChatBubbleLeftIcon, BookOpenIcon, MagnifyingGlassIcon, ShoppingBagIcon } from '@heroicons/react/24/outline';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [feedbacks, setFeedbacks] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [tab, setTab] = useState('overview');
   const [loading, setLoading] = useState(true);
+  const [pwModal, setPwModal] = useState(null); // userId
+  const [newPw, setNewPw] = useState('');
+  const [savingPw, setSavingPw] = useState(false);
 
   useEffect(() => {
     Promise.all([
       api.get('/admin/stats'),
       api.get('/admin/users'),
       api.get('/feedback'),
-    ]).then(([s, u, f]) => {
+      api.get('/orders'),
+    ]).then(([s, u, f, o]) => {
       setStats(s.data.data);
       setUsers(u.data.data);
       setFeedbacks(f.data.data);
+      setOrders(o.data.data);
     }).catch(() => toast.error('Failed to load admin data')).finally(() => setLoading(false));
   }, []);
-
-  const handleRoleChange = async (id, role) => {
-    try {
-      await api.put(`/admin/users/${id}/role`, { role });
-      setUsers(users.map(u => u._id === id ? { ...u, role } : u));
-      toast.success('Role updated');
-    } catch { toast.error('Failed'); }
-  };
 
   const handleDeleteUser = async (id) => {
     if (!window.confirm('Delete this user?')) return;
@@ -40,11 +39,32 @@ export default function AdminDashboard() {
     } catch { toast.error('Failed'); }
   };
 
+  const handleResetPassword = async () => {
+    if (!newPw || newPw.length < 6) return toast.error('Password must be at least 6 characters');
+    setSavingPw(true);
+    try {
+      await api.put(`/admin/users/${pwModal}/password`, { newPassword: newPw });
+      toast.success('Password updated');
+      setPwModal(null);
+      setNewPw('');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed');
+    } finally { setSavingPw(false); }
+  };
+
   const handleFeedbackResponse = async (id, status, adminResponse) => {
     try {
       const { data } = await api.put(`/feedback/${id}`, { status, adminResponse });
       setFeedbacks(feedbacks.map(f => f._id === id ? data.data : f));
       toast.success('Response saved');
+    } catch { toast.error('Failed'); }
+  };
+
+  const handleOrderStatus = async (id, status) => {
+    try {
+      const { data } = await api.put(`/orders/${id}/status`, { status });
+      setOrders(orders.map(o => o._id === id ? data.data : o));
+      toast.success('Status updated');
     } catch { toast.error('Failed'); }
   };
 
@@ -59,15 +79,23 @@ export default function AdminDashboard() {
     { label: 'Lost & Found', value: stats?.lostFound, icon: MagnifyingGlassIcon, color: 'bg-yellow-500' },
   ];
 
+  const statusColor = {
+    pending: 'bg-yellow-100 text-yellow-700',
+    confirmed: 'bg-blue-100 text-blue-700',
+    ready: 'bg-green-100 text-green-700',
+    delivered: 'bg-gray-100 text-gray-600',
+    cancelled: 'bg-red-100 text-red-600',
+  };
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
 
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
         {statCards.map(({ label, value, icon: Icon, color }) => (
           <div key={label} className="card text-center">
-            <div className={`w-10 h-10 ${color} rounded-lg flex items-center justify-center mx-auto mb-2`}>
+            <div className={`w-10 h-10 ${color} rounded flex items-center justify-center mx-auto mb-2`}>
               <Icon className="w-5 h-5 text-white" />
             </div>
             <p className="text-2xl font-bold text-gray-900 dark:text-white">{value ?? 0}</p>
@@ -78,7 +106,7 @@ export default function AdminDashboard() {
 
       {/* Tabs */}
       <div className="flex gap-2 border-b border-gray-200 dark:border-gray-700">
-        {['overview', 'users', 'feedback'].map(t => (
+        {['overview', 'users', 'orders', 'feedback'].map(t => (
           <button
             key={t}
             onClick={() => setTab(t)}
@@ -97,7 +125,7 @@ export default function AdminDashboard() {
               <tr className="text-left text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
                 <th className="pb-3 pr-4">Name</th>
                 <th className="pb-3 pr-4">Email</th>
-                <th className="pb-3 pr-4">Branch/Sem</th>
+                <th className="pb-3 pr-4">Branch / Sem</th>
                 <th className="pb-3 pr-4">Role</th>
                 <th className="pb-3">Actions</th>
               </tr>
@@ -109,22 +137,50 @@ export default function AdminDashboard() {
                   <td className="py-3 pr-4 text-gray-500 dark:text-gray-400">{u.email}</td>
                   <td className="py-3 pr-4 text-gray-500 dark:text-gray-400">{u.branch || '—'} / Sem {u.semester}</td>
                   <td className="py-3 pr-4">
-                    <select
-                      value={u.role}
-                      onChange={e => handleRoleChange(u._id, e.target.value)}
-                      className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                    >
-                      <option value="user">User</option>
-                      <option value="admin">Admin</option>
-                    </select>
+                    <span className={`badge ${u.role === 'admin' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-600'}`}>{u.role}</span>
                   </td>
-                  <td className="py-3">
+                  <td className="py-3 flex gap-2">
+                    <button onClick={() => { setPwModal(u._id); setNewPw(''); }} className="text-blue-500 hover:text-blue-700 text-xs">Change Password</button>
                     <button onClick={() => handleDeleteUser(u._id)} className="text-red-500 hover:text-red-700 text-xs">Delete</button>
                   </td>
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {/* Orders tab */}
+      {tab === 'orders' && (
+        <div className="space-y-3">
+          {orders.length === 0 && <p className="text-gray-500 dark:text-gray-400 text-center py-8">No orders yet.</p>}
+          {orders.map(order => (
+            <div key={order._id} className="card text-sm">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <span className="font-medium text-gray-900 dark:text-white">{order.outlet?.name}</span>
+                  <span className="text-gray-400 ml-2">by {order.user?.name} ({order.user?.email})</span>
+                </div>
+                <span className={`badge ${statusColor[order.status]}`}>{order.status}</span>
+              </div>
+              <div className="text-gray-500 dark:text-gray-400 mb-2">
+                {order.items.map((item, i) => <span key={i} className="mr-3">{item.name} x{item.quantity}</span>)}
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-semibold text-gray-900 dark:text-white">₹{order.total}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">{new Date(order.createdAt).toLocaleDateString()}</span>
+                  <select
+                    value={order.status}
+                    onChange={e => handleOrderStatus(order._id, e.target.value)}
+                    className="text-xs border border-gray-300 dark:border-gray-600 rounded px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                  >
+                    {['pending','confirmed','ready','delivered','cancelled'].map(s => <option key={s} value={s}>{s}</option>)}
+                  </select>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 
@@ -140,9 +196,25 @@ export default function AdminDashboard() {
 
       {tab === 'overview' && (
         <div className="card">
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Use the tabs above to manage users and feedback. Use the sidebar to manage events, clubs, food outlets, and other content.</p>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Use the tabs above to manage users, orders and feedback.</p>
         </div>
       )}
+
+      {/* Change password modal */}
+      <Modal open={!!pwModal} onClose={() => setPwModal(null)} title="Change User Password">
+        <div className="space-y-3">
+          <input
+            type="password"
+            className="input-field"
+            placeholder="New password (min 6 characters)"
+            value={newPw}
+            onChange={e => setNewPw(e.target.value)}
+          />
+          <button onClick={handleResetPassword} disabled={savingPw} className="btn-primary w-full">
+            {savingPw ? 'Saving...' : 'Update Password'}
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }
@@ -161,9 +233,7 @@ function FeedbackCard({ fb, onRespond }) {
         <span className="text-xs text-gray-400">{new Date(fb.createdAt).toLocaleDateString()}</span>
       </div>
       <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{fb.message}</p>
-      <p className="text-xs text-gray-400 mb-3">
-        By: {fb.isAnonymous ? 'Anonymous' : fb.submittedBy?.name || 'Unknown'} • {'⭐'.repeat(fb.rating)}
-      </p>
+      <p className="text-xs text-gray-400 mb-3">By: {fb.isAnonymous ? 'Anonymous' : fb.submittedBy?.name || 'Unknown'}</p>
       <div className="flex gap-2">
         <input
           className="input-field flex-1 text-sm"

@@ -15,6 +15,8 @@ export default function Profile() {
     specialisation: user?.specialisation || '',
   });
   const [saving, setSaving] = useState(false);
+  const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirm: '' });
+  const [savingPw, setSavingPw] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -27,6 +29,23 @@ export default function Profile() {
     finally { setSaving(false); }
   };
 
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (pwForm.newPassword !== pwForm.confirm) return toast.error('Passwords do not match');
+    if (pwForm.newPassword.length < 6) return toast.error('Minimum 6 characters');
+    setSavingPw(true);
+    try {
+      await api.put('/auth/change-password', {
+        currentPassword: pwForm.currentPassword,
+        newPassword: pwForm.newPassword,
+      });
+      toast.success('Password changed!');
+      setPwForm({ currentPassword: '', newPassword: '', confirm: '' });
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed');
+    } finally { setSavingPw(false); }
+  };
+
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
   return (
@@ -35,7 +54,7 @@ export default function Profile() {
 
       <div className="card">
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+          <div className="w-16 h-16 bg-blue-600 rounded flex items-center justify-center text-white text-2xl font-bold">
             {user?.name?.[0]?.toUpperCase()}
           </div>
           <div>
@@ -107,6 +126,28 @@ export default function Profile() {
           </div>
           <button type="submit" disabled={saving} className="btn-primary w-full">
             {saving ? 'Saving...' : 'Save Changes'}
+          </button>
+        </form>
+      </div>
+
+      {/* Change Password */}
+      <div className="card">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Change Password</h2>
+        <form onSubmit={handleChangePassword} className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Current Password</label>
+            <input type="password" className="input-field" placeholder="••••••••" value={pwForm.currentPassword} onChange={e => setPwForm({ ...pwForm, currentPassword: e.target.value })} required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">New Password</label>
+            <input type="password" className="input-field" placeholder="••••••••" value={pwForm.newPassword} onChange={e => setPwForm({ ...pwForm, newPassword: e.target.value })} required />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Confirm New Password</label>
+            <input type="password" className="input-field" placeholder="••••••••" value={pwForm.confirm} onChange={e => setPwForm({ ...pwForm, confirm: e.target.value })} required />
+          </div>
+          <button type="submit" disabled={savingPw} className="btn-primary w-full">
+            {savingPw ? 'Saving...' : 'Change Password'}
           </button>
         </form>
       </div>

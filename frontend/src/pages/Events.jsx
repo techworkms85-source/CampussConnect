@@ -118,8 +118,8 @@ export default function Events() {
               {isRegistered(event) && <span className="text-xs text-green-600 font-medium self-center">Registered ✓</span>}
               {user?.role === 'admin' && (
                 <>
-                  <button onClick={() => openEdit(event)} className="btn-secondary text-xs px-2">✏️</button>
-                  <button onClick={() => handleDelete(event._id)} className="btn-danger text-xs px-2">🗑</button>
+                  <button onClick={() => openEdit(event)} className="btn-secondary text-xs px-2">Edit</button>
+                  <button onClick={() => handleDelete(event._id)} className="btn-danger text-xs px-2">Delete</button>
                 </>
               )}
             </div>

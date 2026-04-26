@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
+import Logo from '../components/Logo';
 
 export default function Login() {
   const { login } = useAuth();
@@ -33,45 +34,51 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 p-4">
-      <div className="w-full max-w-md">
+    <div className="relative min-h-screen flex items-center justify-center p-4">
+      {/* Background image with blur + dark overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{ backgroundImage: "url('/Benn.webp')", filter: 'blur(3px) brightness(0.45)', transform: 'scale(1.05)' }}
+      />
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-bold text-2xl">CP</span>
+          <div className="flex justify-center mb-4">
+            <Logo size={64} />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Campus Portal</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Sign in to your account</p>
+          <h1 className="text-3xl font-bold text-white">Campus Portal</h1>
+          <p className="text-gray-300 mt-1">Sign in to your account</p>
         </div>
 
-        <div className="card">
+        <div className="bg-white border border-gray-200 rounded p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
                 type="email"
-                className={`input-field ${errors.email ? 'border-red-500' : ''}`}
+                className={`w-full px-3 py-2 border rounded bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.email ? 'border-red-400' : 'border-gray-300'}`}
                 placeholder="you@bennett.edu.in"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
               />
-              {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+              {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Password</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
               <input
                 type="password"
-                className={`input-field ${errors.password ? 'border-red-500' : ''}`}
+                className={`w-full px-3 py-2 border rounded bg-white text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ${errors.password ? 'border-red-400' : 'border-gray-300'}`}
                 placeholder="••••••••"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
               />
-              {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+              {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password}</p>}
             </div>
             <button type="submit" disabled={loading} className="btn-primary w-full">
               {loading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
-          <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+          <p className="text-center text-sm text-gray-500 mt-4">
             Don't have an account?{' '}
             <Link to="/register" className="text-blue-600 hover:underline font-medium">Sign up</Link>
           </p>

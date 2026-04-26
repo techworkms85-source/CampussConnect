@@ -46,6 +46,22 @@ exports.updateRole = async (req, res) => {
   }
 };
 
+// @PUT /api/admin/users/:id/password
+exports.resetUserPassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+    if (!newPassword || newPassword.length < 6)
+      return res.status(400).json({ success: false, message: 'Password must be at least 6 characters' });
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    user.password = newPassword;
+    await user.save();
+    res.json({ success: true, message: 'Password updated' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // @DELETE /api/admin/users/:id
 exports.deleteUser = async (req, res) => {
   try {

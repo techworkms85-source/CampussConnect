@@ -151,9 +151,9 @@ export default function LostAndFound() {
               <h3 className="font-semibold text-gray-900 dark:text-white">{item.title}</h3>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">{item.description}</p>
               <div className="mt-2 text-xs text-gray-400 space-y-0.5">
-                <p>📍 {item.location}</p>
-                <p>📅 {new Date(item.date).toLocaleDateString()}</p>
-                <p>📞 {item.contactName} • {item.contactEmail}</p>
+                <p>Location: {item.location}</p>
+                <p>Date: {new Date(item.date).toLocaleDateString()}</p>
+                <p>Contact: {item.contactName} &bull; {item.contactEmail}</p>
               </div>
               {((user?._id || user?.id)?.toString() === item.postedBy?._id?.toString() || user?.role === 'admin') && (
                 <div className="flex gap-2 mt-3">
@@ -204,8 +204,8 @@ export default function LostAndFound() {
                   <button
                     type="button"
                     onClick={() => { setImageFile(null); setImagePreview(''); }}
-                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-                  >✕</button>
+                    className="absolute top-2 right-2 bg-red-500 text-white rounded w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                  >x</button>
                 </div>
               ) : (
                 <label htmlFor="lf-image" className="flex flex-col items-center justify-center h-24 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">

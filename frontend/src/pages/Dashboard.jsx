@@ -28,8 +28,8 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Welcome */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-6 text-white">
-        <h1 className="text-2xl font-bold">Welcome back, {user?.name?.split(' ')[0]}! 👋</h1>
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded p-6 text-white">
+        <h1 className="text-2xl font-bold">Welcome back, {user?.name?.split(' ')[0]}.</h1>
         <p className="text-blue-100 mt-1">
           {user?.branch && `${user.branch} • `}Semester {user?.semester} • Bennett University
         </p>
@@ -45,7 +45,7 @@ export default function Dashboard() {
               to={to}
               className="card hover:shadow-md transition-shadow group cursor-pointer"
             >
-              <div className={`w-12 h-12 ${color} rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
+              <div className={`w-12 h-12 ${color} rounded flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
                 <Icon className="w-6 h-6 text-white" />
               </div>
               <h3 className="font-semibold text-gray-900 dark:text-white">{label}</h3>
