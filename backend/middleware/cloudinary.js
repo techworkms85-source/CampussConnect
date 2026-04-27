@@ -13,7 +13,6 @@ const documentStorage = new CloudinaryStorage({
   params: {
     folder: 'campus-portal/resources',
     resource_type: 'raw',
-    allowed_formats: ['pdf', 'doc', 'docx', 'ppt', 'pptx', 'zip', 'txt'],
   },
 });
 
@@ -23,7 +22,6 @@ const imageStorage = new CloudinaryStorage({
   params: {
     folder: 'campus-portal/lost-found',
     resource_type: 'image',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
   },
 });
 
