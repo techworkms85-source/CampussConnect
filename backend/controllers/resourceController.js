@@ -23,7 +23,7 @@ exports.upload = async (req, res) => {
     if (!req.file) return res.status(400).json({ success: false, message: 'No file uploaded' });
     const resource = await Resource.create({
       ...req.body,
-      fileUrl: `/uploads/${req.file.filename}`,
+      fileUrl: req.file.path,           // Cloudinary full URL
       fileName: req.file.originalname,
       fileType: path.extname(req.file.originalname).slice(1),
       uploadedBy: req.user._id,

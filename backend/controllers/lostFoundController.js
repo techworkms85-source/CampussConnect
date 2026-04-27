@@ -18,7 +18,7 @@ exports.getAll = async (req, res) => {
 // @POST /api/lostandfound
 exports.create = async (req, res) => {
   try {
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : '';
+    const imageUrl = req.file ? req.file.path : '';  // Cloudinary full URL
     const item = await LostFound.create({ ...req.body, image: imageUrl, postedBy: req.user._id });
     res.status(201).json({ success: true, data: item });
   } catch (err) {
@@ -33,7 +33,7 @@ exports.update = async (req, res) => {
     if (!item) return res.status(404).json({ success: false, message: 'Item not found' });
     if (item.postedBy.toString() !== req.user._id.toString() && req.user.role !== 'admin')
       return res.status(403).json({ success: false, message: 'Not authorized' });
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : item.image;
+    const imageUrl = req.file ? req.file.path : item.image;  // Cloudinary full URL
     const updated = await LostFound.findByIdAndUpdate(req.params.id, { ...req.body, image: imageUrl }, { new: true });
     res.json({ success: true, data: updated });
   } catch (err) {

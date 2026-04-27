@@ -4,14 +4,11 @@ const multer = require('multer');
 const path = require('path');
 const { getAll, create, update, remove } = require('../controllers/lostFoundController');
 const { protect } = require('../middleware/auth');
+const { imageStorage } = require('../middleware/cloudinary');
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, 'uploads/'),
-  filename: (req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
-});
 const imageUpload = multer({
-  storage,
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  storage: imageStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
     if (allowed.includes(path.extname(file.originalname).toLowerCase())) cb(null, true);

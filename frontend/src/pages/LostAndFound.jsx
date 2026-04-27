@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { PlusIcon, TrashIcon, PencilIcon, PhotoIcon } from '@heroicons/react/24/outline';
 
 const CATEGORIES = ['Electronics', 'Books', 'ID Card', 'Keys', 'Wallet', 'Clothing', 'Other'];
-const BASE_URL = process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000';
+const BASE_URL = ''; // images are now full Cloudinary URLs
 
 const emptyForm = () => ({
   title: '', description: '', type: 'lost', category: 'Other',
