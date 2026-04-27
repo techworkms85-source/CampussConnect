@@ -58,7 +58,7 @@ export default function Resources() {
 
   const handleDownload = async (resource) => {
     await api.get(`/resources/${resource._id}/download`);
-    window.open(`${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}${resource.fileUrl}`, '_blank');
+    window.open(resource.fileUrl, '_blank');
   };
 
   if (loading) return <Spinner />;
